@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { signOut } from "./actions";
 import ProfileForm from "./profile-form";
 import styles from "./account.module.css";
-import DeleteProfileButton from "./delete-profile-button";
+import ProfileControls from "./profile-controls";
 
 const avatarSymbols: Record<string, string> = {
   moon: "☾",
@@ -118,10 +118,7 @@ export default async function AccountPage() {
                         <p>Ages {profile.age_band}</p>
                     </div>
 
-                    <DeleteProfileButton
-                    profileId={profile.id}
-                    profileName={profile.name}
-                    />
+                    <ProfileControls profile={profile} />
                   </div>
                 ))}
               </div>

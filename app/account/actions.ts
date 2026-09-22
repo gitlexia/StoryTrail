@@ -91,6 +91,94 @@ export async function createListenerProfile(
   };
 }
 
+export async function updateListenerProfile(
+  _previousState: ProfileActionState,
+  formData: FormData,
+): Promise<ProfileActionState> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return {
+      success: false,
+      error: "You must be signed in to update a listener profile.",
+    };
+  }
+
+  const profileId = String(formData.get("profileId") ?? "");
+  const name = String(formData.get("name") ?? "").trim();
+  const ageBand = String(formData.get("ageBand") ?? "");
+  const avatar = String(formData.get("avatar") ?? "");
+  const interests = formData
+    .getAll("interests")
+    .map(String)
+    .filter((interest) => allowedInterests.includes(interest));
+
+  const uuidPattern =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+  if (!uuidPattern.test(profileId)) {
+    return {
+      success: false,
+      error: "This listener profile is invalid.",
+    };
+  }
+
+  if (name.length < 1 || name.length > 40) {
+    return {
+      success: false,
+      error: "Enter a profile name between 1 and 40 characters.",
+    };
+  }
+
+  if (!allowedAgeBands.includes(ageBand)) {
+    return {
+      success: false,
+      error: "Choose a valid age range.",
+    };
+  }
+
+  if (!allowedAvatars.includes(avatar)) {
+    return {
+      success: false,
+      error: "Choose a valid avatar.",
+    };
+  }
+
+  const { data, error } = await supabase
+    .from("listener_profiles")
+    .update({
+      name,
+      age_band: ageBand,
+      avatar,
+      interests,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", profileId)
+    .eq("user_id", user.id)
+    .select("id")
+    .maybeSingle();
+
+  if (error || !data) {
+    console.error("Unable to update listener profile:", error);
+
+    return {
+      success: false,
+      error: "We couldn't update the profile. Please try again.",
+    };
+  }
+
+  revalidatePath("/account");
+
+  return {
+    success: true,
+    error: null,
+  };
+}
+
 export async function deleteListenerProfile(formData: FormData) {
   const supabase = await createClient();
 

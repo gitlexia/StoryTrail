@@ -481,3 +481,101 @@
   cursor: wait;
   opacity: 0.6;
 }
+
+.listenerProfile {
+  flex-wrap: wrap;
+}
+
+.profileActions {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: auto;
+}
+
+.editProfileButton {
+  padding: 7px 10px;
+  color: #405173;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.editProfileButton:hover {
+  color: #17316f;
+  background: #edf1ff;
+  border-color: #d7def8;
+}
+
+.editProfileButton:focus-visible {
+  outline: 3px solid rgb(73 109 242 / 25%);
+  outline-offset: 2px;
+}
+
+.editProfileForm {
+  display: grid;
+  flex: 0 0 100%;
+  gap: 20px;
+  padding: 20px;
+  margin-top: 8px;
+  background: #ffffff;
+  border: 1px solid #dfe4f3;
+  border-radius: 16px;
+}
+
+.editProfileForm .formField label {
+  display: grid;
+  gap: 8px;
+}
+
+.editFormActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.cancelEditButton,
+.saveProfileButton {
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 11px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.cancelEditButton {
+  color: #59647d;
+  background: #ffffff;
+  border: 1px solid #d3d9e5;
+}
+
+.cancelEditButton:hover {
+  background: #f5f6f9;
+}
+
+.saveProfileButton {
+  color: #ffffff;
+  background: #496df2;
+  border: 1px solid #496df2;
+}
+
+.saveProfileButton:hover:not(:disabled) {
+  background: #3559df;
+}
+
+.saveProfileButton:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.cancelEditButton:focus-visible,
+.saveProfileButton:focus-visible {
+  outline: 3px solid rgb(73 109 242 / 25%);
+  outline-offset: 2px;
+}
