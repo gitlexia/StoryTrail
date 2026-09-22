@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ArrowRight, ChevronRight, Headphones, Heart, LockKeyhole, Menu, Pause, Play, Search, Sparkles } from "lucide-react";
+import AuthNavLink from "@/components/auth-nav-link";
 
 const stories = [
   { title: "Moon Garden", eyebrow: "Ages 5–8 · 18 min", tone: "moon", symbol: "☾" },
@@ -20,7 +21,7 @@ export default function Home() {
       <header className="site-header">
         <a className="brand" href="#top" aria-label="StoryTrail home"><span className="brand-mark">S</span>StoryTrail</a>
         <nav aria-label="Main navigation"><a href="#stories">Discover</a><a href="#membership">Membership</a><a href="#parents">For parents</a></nav>
-        <div className="header-actions"><button className="icon-button search-button" aria-label="Search"><Search size={19}/></button><button className="text-button">Sign in</button><button className="primary-button small">Start listening</button><button className="icon-button mobile-menu" aria-label="Open menu"><Menu size={22}/></button></div>
+        <div className="header-actions"><button className="icon-button search-button" aria-label="Search"><Search size={19}/></button><AuthNavLink /><button className="primary-button small">Start listening</button><button className="icon-button mobile-menu" aria-label="Open menu"><Menu size={22}/></button></div>
       </header>
 
       <section id="top" className="hero">

@@ -1,0 +1,267 @@
+.page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(440px, 0.95fr);
+  background: #fffaf1;
+  color: #17233b;
+}
+
+.introduction {
+  min-height: 100vh;
+  padding: 44px clamp(40px, 7vw, 110px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background:
+    radial-gradient(circle at 18% 20%, rgba(255, 207, 112, 0.52), transparent 32%),
+    radial-gradient(circle at 82% 78%, rgba(245, 132, 103, 0.38), transparent 34%),
+    #f3c969;
+}
+
+.logo {
+  width: fit-content;
+  color: #17233b;
+  font-size: 1.45rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  text-decoration: none;
+}
+
+.introduction h1 {
+  max-width: 680px;
+  margin: 14px 0 22px;
+  font-size: clamp(3rem, 6vw, 6.5rem);
+  line-height: 0.94;
+  letter-spacing: -0.065em;
+}
+
+.eyebrow {
+  margin: 0;
+  color: #b94732;
+  font-size: 0.77rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.description {
+  max-width: 580px;
+  margin: 0;
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
+  line-height: 1.65;
+}
+
+.footer {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.formSection {
+  min-height: 100vh;
+  padding: 48px clamp(28px, 6vw, 90px);
+  display: grid;
+  place-items: center;
+}
+
+.formCard {
+  width: min(100%, 500px);
+}
+
+.formHeading h2 {
+  margin: 10px 0;
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1;
+  letter-spacing: -0.045em;
+}
+
+.formHeading > p:last-child {
+  margin: 0;
+  color: #647083;
+  line-height: 1.6;
+}
+
+.tabs {
+  margin: 32px 0 24px;
+  padding: 5px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  background: #f0ece4;
+  border-radius: 14px;
+}
+
+.tabs button {
+  padding: 11px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #667083;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.tabs .activeTab {
+  background: white;
+  color: #17233b;
+  box-shadow: 0 3px 12px rgba(23, 35, 59, 0.08);
+}
+
+.googleButton,
+.submitButton {
+  width: 100%;
+  min-height: 50px;
+  border-radius: 12px;
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.googleButton {
+  border: 1px solid #d8d8d3;
+  background: white;
+  color: #17233b;
+}
+
+.googleMark {
+  margin-right: 10px;
+  color: #4285f4;
+  font-weight: 900;
+}
+
+.submitButton {
+  margin-top: 4px;
+  border: 0;
+  background: #17233b;
+  color: white;
+  box-shadow: 0 8px 24px rgba(23, 35, 59, 0.18);
+}
+
+.googleButton:hover,
+.submitButton:hover {
+  transform: translateY(-1px);
+}
+
+.googleButton:focus-visible,
+.submitButton:focus-visible,
+.tabs button:focus-visible,
+.form input:focus-visible,
+.logo:focus-visible {
+  outline: 3px solid #e66f51;
+  outline-offset: 3px;
+}
+
+.googleButton:disabled,
+.submitButton:disabled {
+  cursor: wait;
+  opacity: 0.65;
+  transform: none;
+}
+
+.divider {
+  margin: 24px 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: #89919d;
+  font-size: 0.78rem;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: #dddcd6;
+}
+
+.form {
+  display: grid;
+  gap: 18px;
+}
+
+.form label {
+  display: grid;
+  gap: 8px;
+  font-size: 0.87rem;
+  font-weight: 750;
+}
+
+.form input {
+  width: 100%;
+  min-height: 50px;
+  padding: 0 15px;
+  border: 1px solid #d8d8d3;
+  border-radius: 12px;
+  background: white;
+  color: #17233b;
+  font: inherit;
+}
+
+.form input::placeholder {
+  color: #a0a6af;
+}
+
+.errorMessage,
+.successMessage {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.errorMessage {
+  background: #fff0ed;
+  color: #a63120;
+}
+
+.successMessage {
+  background: #edf8ef;
+  color: #276838;
+}
+
+.terms {
+  margin: 20px 0 0;
+  color: #858c97;
+  font-size: 0.74rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+@media (max-width: 850px) {
+  .page {
+    display: block;
+  }
+
+  .introduction {
+    min-height: auto;
+    padding: 30px 24px 56px;
+    gap: 64px;
+  }
+
+  .introduction h1 {
+    max-width: 560px;
+    font-size: clamp(3rem, 13vw, 5rem);
+  }
+
+  .footer {
+    display: none;
+  }
+
+  .formSection {
+    min-height: auto;
+    padding: 54px 24px 70px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .googleButton,
+  .submitButton {
+    transition: none;
+  }
+}

@@ -1,0 +1,192 @@
+.page {
+  min-height: 100vh;
+  background: #fffaf1;
+  color: #17233b;
+}
+
+.navigation {
+  height: 76px;
+  padding: 0 clamp(24px, 6vw, 90px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(23, 35, 59, 0.1);
+}
+
+.logo {
+  color: #17233b;
+  font-size: 1.4rem;
+  font-weight: 850;
+  letter-spacing: -0.04em;
+  text-decoration: none;
+}
+
+.homeLink {
+  color: #17233b;
+  font-size: 0.88rem;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.content {
+  width: min(1120px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 76px 0 90px;
+}
+
+.heading {
+  max-width: 680px;
+  margin-bottom: 42px;
+}
+
+.eyebrow,
+.label {
+  margin: 0;
+  color: #b94732;
+  font-size: 0.73rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.heading h1 {
+  margin: 12px 0;
+  font-size: clamp(2.7rem, 6vw, 5rem);
+  line-height: 0.98;
+  letter-spacing: -0.06em;
+}
+
+.heading > p:last-child {
+  margin: 0;
+  color: #657084;
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+.grid {
+  margin-bottom: 32px;
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 20px;
+}
+
+.profileCard,
+.detailCard,
+.placeholderCard {
+  padding: 30px;
+  border: 1px solid rgba(23, 35, 59, 0.1);
+  border-radius: 22px;
+  background: white;
+  box-shadow: 0 12px 40px rgba(23, 35, 59, 0.06);
+}
+
+.profileCard {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.avatar {
+  width: 72px;
+  height: 72px;
+  flex: 0 0 72px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #f3c969;
+  font-size: 1.8rem;
+  font-weight: 850;
+}
+
+.profileCard h2,
+.placeholderCard h2 {
+  margin: 7px 0;
+  font-size: 1.35rem;
+  letter-spacing: -0.025em;
+}
+
+.profileCard p:last-child,
+.placeholderCard > p {
+  margin: 0;
+  color: #6b7483;
+}
+
+.detailCard {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  grid-column: 1 / -1;
+}
+
+.value,
+.verified {
+  margin: 8px 0 0;
+  font-weight: 750;
+}
+
+.verified {
+  color: #297743;
+}
+
+.placeholderCard {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.placeholderCard > p {
+  line-height: 1.55;
+}
+
+.placeholderCard button {
+  margin-top: 22px;
+  padding: 10px 15px;
+  border: 0;
+  border-radius: 10px;
+  background: #eceae4;
+  color: #858b94;
+  font: inherit;
+  font-weight: 750;
+}
+
+.signOutButton {
+  padding: 11px 18px;
+  border: 1px solid #c9c8c2;
+  border-radius: 11px;
+  background: transparent;
+  color: #17233b;
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.signOutButton:hover {
+  background: white;
+}
+
+.signOutButton:focus-visible,
+.logo:focus-visible,
+.homeLink:focus-visible {
+  outline: 3px solid #e66f51;
+  outline-offset: 3px;
+}
+
+@media (max-width: 760px) {
+  .content {
+    width: min(100% - 32px, 1120px);
+    padding-top: 48px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .placeholderCard {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  .detailCard {
+    grid-column: auto;
+    grid-template-columns: 1fr;
+  }
+}
