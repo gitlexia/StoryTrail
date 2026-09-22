@@ -2,16 +2,35 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "./actions";
+import ProfileForm from "./profile-form";
 import styles from "./account.module.css";
+import DeleteProfileButton from "./delete-profile-button";
+
+const avatarSymbols: Record<string, string> = {
+  moon: "☾",
+  star: "✦",
+  rocket: "🚀",
+  forest: "♧",
+};
 
 export default async function AccountPage() {
   const supabase = await createClient();
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
     redirect("/auth");
+  }
+
+  const { data: profiles, error: profilesError } = await supabase
+    .from("listener_profiles")
+    .select("id, name, age_band, avatar, interests")
+    .order("created_at", { ascending: true });
+
+  if (profilesError) {
+    console.error("Unable to load listener profiles:", profilesError);
   }
 
   const displayName =
@@ -80,14 +99,40 @@ export default async function AccountPage() {
 
           <article className={styles.placeholderCard}>
             <p className={styles.label}>Family profiles</p>
-            <h2>Create your first listener profile</h2>
-            <p>
-              Profiles will keep favourites, recommendations and listening
-              progress separate for each child.
-            </p>
-            <button type="button" disabled>
-              Coming next
-            </button>
+            <h2>
+              {profiles?.length
+                ? "Your listeners"
+                : "Create your first listener profile"}
+            </h2>
+
+            {profiles?.length ? (
+              <div className={styles.profileList}>
+                {profiles.map((profile) => (
+                  <div className={styles.listenerProfile} key={profile.id}>
+                    <span aria-hidden="true">
+                      {avatarSymbols[profile.avatar] ?? "✦"}
+                    </span>
+
+                    <div>
+                        <strong>{profile.name}</strong>
+                        <p>Ages {profile.age_band}</p>
+                    </div>
+
+                    <DeleteProfileButton
+                    profileId={profile.id}
+                    profileName={profile.name}
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p>
+                Profiles keep favourites, recommendations and listening
+                progress separate for each child.
+              </p>
+            )}
+
+            <ProfileForm />
           </article>
         </div>
 
