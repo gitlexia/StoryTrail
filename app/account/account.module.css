@@ -190,3 +190,392 @@
     grid-template-columns: 1fr;
   }
 }
+
+.profileList {
+  display: grid;
+  gap: 12px;
+  margin: 20px 0 28px;
+}
+
+.listenerProfile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: #f5f7ff;
+  border: 1px solid #dfe4f3;
+  border-radius: 16px;
+}
+
+.listenerProfile > span {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  flex-shrink: 0;
+  color: #182441;
+  background: #f8cb65;
+  border-radius: 50%;
+  font-size: 25px;
+}
+
+.listenerProfile strong {
+  display: block;
+  color: #14203c;
+  font-size: 18px;
+}
+
+.listenerProfile p {
+  margin: 3px 0 0;
+  color: #68738c;
+  font-size: 14px;
+}
+
+.profileForm {
+  display: grid;
+  gap: 22px;
+  margin-top: 28px;
+  padding-top: 28px;
+  border-top: 1px solid #e2e5ec;
+}
+
+.formField {
+  display: grid;
+  gap: 8px;
+}
+
+.formField label,
+.choiceGroup legend {
+  color: #14203c;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.formField input,
+.formField select {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  color: #14203c;
+  background: #ffffff;
+  border: 1px solid #cfd5e2;
+  border-radius: 12px;
+  font: inherit;
+  outline: none;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.formField input:focus,
+.formField select:focus {
+  border-color: #496df2;
+  box-shadow: 0 0 0 4px rgb(73 109 242 / 12%);
+}
+
+.formField input::placeholder {
+  color: #9299a9;
+}
+
+.choiceGroup {
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
+.choiceGroup legend {
+  margin-bottom: 10px;
+}
+
+.avatarChoices {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 9px;
+}
+
+.avatarChoice {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  padding: 12px 6px 10px;
+  place-items: center;
+  gap: 4px;
+  color: #68738c;
+  background: #ffffff;
+  border: 1px solid #d8ddea;
+  border-radius: 14px;
+  cursor: pointer;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+.avatarChoice:hover {
+  border-color: #98a9ee;
+  transform: translateY(-1px);
+}
+
+.avatarChoice:has(input:checked) {
+  color: #17316f;
+  background: #edf1ff;
+  border-color: #496df2;
+  box-shadow: 0 0 0 2px rgb(73 109 242 / 10%);
+}
+
+.avatarChoice:focus-within {
+  outline: 3px solid rgb(73 109 242 / 25%);
+  outline-offset: 2px;
+}
+
+.avatarChoice input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.avatarChoice span {
+  font-size: 25px;
+  line-height: 1;
+}
+
+.avatarChoice small {
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.interestChoices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.interestChoices label {
+  position: relative;
+  cursor: pointer;
+}
+
+.interestChoices input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.interestChoices span {
+  display: block;
+  padding: 9px 12px;
+  color: #5c6780;
+  background: #ffffff;
+  border: 1px solid #d8ddea;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 750;
+  transition:
+    color 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease;
+}
+
+.interestChoices label:hover span {
+  border-color: #98a9ee;
+}
+
+.interestChoices label:has(input:checked) span {
+  color: #ffffff;
+  background: #17316f;
+  border-color: #17316f;
+}
+
+.interestChoices label:focus-within span {
+  outline: 3px solid rgb(73 109 242 / 25%);
+  outline-offset: 2px;
+}
+
+.formError,
+.formSuccess {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.formError {
+  color: #9d2e27;
+  background: #fff0ed;
+}
+
+.formSuccess {
+  color: #237441;
+  background: #eaf8ef;
+}
+
+.placeholderCard .createProfileButton {
+  width: 100%;
+  min-height: 50px;
+  padding: 0 18px;
+  color: #ffffff;
+  background: #496df2;
+  border: 0;
+  border-radius: 14px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 850;
+  box-shadow: 0 10px 24px rgb(73 109 242 / 20%);
+  transition:
+    background 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.placeholderCard .createProfileButton:hover:not(:disabled) {
+  background: #3559df;
+  transform: translateY(-1px);
+  box-shadow: 0 13px 28px rgb(73 109 242 / 27%);
+}
+
+.placeholderCard .createProfileButton:focus-visible {
+  outline: 3px solid rgb(73 109 242 / 30%);
+  outline-offset: 3px;
+}
+
+.placeholderCard .createProfileButton:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+@media (max-width: 600px) {
+  .avatarChoices {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.deleteProfileButton {
+  padding: 7px 10px;
+  margin-left: auto;
+  color: #a63c34;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.deleteProfileButton:hover:not(:disabled) {
+  color: #842d27;
+  background: #fff0ed;
+  border-color: #f4d1cc;
+}
+
+.deleteProfileButton:focus-visible {
+  outline: 3px solid rgb(166 60 52 / 20%);
+  outline-offset: 2px;
+}
+
+.deleteProfileButton:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.listenerProfile {
+  flex-wrap: wrap;
+}
+
+.profileActions {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: auto;
+}
+
+.editProfileButton {
+  padding: 7px 10px;
+  color: #405173;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.editProfileButton:hover {
+  color: #17316f;
+  background: #edf1ff;
+  border-color: #d7def8;
+}
+
+.editProfileButton:focus-visible {
+  outline: 3px solid rgb(73 109 242 / 25%);
+  outline-offset: 2px;
+}
+
+.editProfileForm {
+  display: grid;
+  flex: 0 0 100%;
+  gap: 20px;
+  padding: 20px;
+  margin-top: 8px;
+  background: #ffffff;
+  border: 1px solid #dfe4f3;
+  border-radius: 16px;
+}
+
+.editProfileForm .formField label {
+  display: grid;
+  gap: 8px;
+}
+
+.editFormActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.cancelEditButton,
+.saveProfileButton {
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 11px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.cancelEditButton {
+  color: #59647d;
+  background: #ffffff;
+  border: 1px solid #d3d9e5;
+}
+
+.cancelEditButton:hover {
+  background: #f5f6f9;
+}
+
+.saveProfileButton {
+  color: #ffffff;
+  background: #496df2;
+  border: 1px solid #496df2;
+}
+
+.saveProfileButton:hover:not(:disabled) {
+  background: #3559df;
+}
+
+.saveProfileButton:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.cancelEditButton:focus-visible,
+.saveProfileButton:focus-visible {
+  outline: 3px solid rgb(73 109 242 / 25%);
+  outline-offset: 2px;
+}
