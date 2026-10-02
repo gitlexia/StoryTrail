@@ -153,7 +153,10 @@ export default function Home() {
       : 0;
 
   const moonGarden = stories[0];
+  const tinyOrchestra = stories[1];
+
   const moonGardenPlaying = isStoryPlaying(moonGarden);
+  const tinyOrchestraPlaying = isStoryPlaying(tinyOrchestra);
 
   return (
     <main>
@@ -224,17 +227,17 @@ export default function Home() {
             <button
               className="preview-button"
               type="button"
-              onClick={() => void toggleStoryPreview(moonGarden)}
+              onClick={() => void toggleStoryPreview(tinyOrchestra)}
             >
               <span>
-                {moonGardenPlaying ? (
+                {tinyOrchestraPlaying ? (
                   <Pause size={18} fill="currentColor" />
                 ) : (
                   <Play size={18} fill="currentColor" />
                 )}
               </span>
 
-              {moonGardenPlaying
+              {tinyOrchestraPlaying
                 ? "Pause preview"
                 : "Hear a preview"}
             </button>
