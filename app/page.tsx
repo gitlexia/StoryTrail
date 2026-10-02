@@ -18,54 +18,96 @@ import AuthNavLink from "@/components/auth-nav-link";
 const stories = [
   {
     title: "Moon Garden",
+    subtitle: "The silver seed",
     eyebrow: "Ages 5–8 · 18 min",
     tone: "moon",
     symbol: "☾",
+    previewPath: "moon-garden/preview.mp3",
   },
   {
     title: "The Tiny Orchestra",
+    subtitle: "A very small symphony",
     eyebrow: "Ages 4–7 · 12 min",
     tone: "music",
     symbol: "♫",
+    previewPath: "tiny-orchestra/preview.mp3",
   },
   {
     title: "Dinosaur Detectives",
+    subtitle: "The mysterious footprint",
     eyebrow: "Ages 6–9 · 22 min",
     tone: "dino",
     symbol: "✦",
+    previewPath: "dinosaur-detectives/preview.mp3",
   },
   {
     title: "Cloudberry Woods",
+    subtitle: "The glowing berry",
     eyebrow: "Ages 3–6 · 9 min",
     tone: "woods",
     symbol: "♧",
+    previewPath: "cloudberry-woods/preview.mp3",
   },
 ];
+
+type Story = (typeof stories)[number];
 
 export default function Home() {
   const [playing, setPlaying] = useState(false);
   const [playerVisible, setPlayerVisible] = useState(false);
+  const [activeStory, setActiveStory] = useState<Story>(stories[0]);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [liked, setLiked] = useState<string[]>([]);
 
   const previewAudio = useRef<HTMLAudioElement>(null);
 
-  const previewUrl =
-    `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/` +
-    "story-previews/moon-garden/preview.mp3";
+  function getPreviewUrl(previewPath: string) {
+    return (
+      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/` +
+      `story-previews/${previewPath}`
+    );
+  }
 
-  async function togglePreview() {
+  function isStoryPlaying(story: Story) {
+    return activeStory.previewPath === story.previewPath && playing;
+  }
+
+  async function toggleStoryPreview(story: Story) {
     const audio = previewAudio.current;
 
     if (!audio) return;
 
     setPlayerVisible(true);
 
+    const isSelectedStory =
+      activeStory.previewPath === story.previewPath;
+
+    if (!isSelectedStory) {
+      audio.pause();
+
+      setActiveStory(story);
+      setCurrentTime(0);
+      setDuration(0);
+
+      audio.src = getPreviewUrl(story.previewPath);
+      audio.load();
+
+      try {
+        await audio.play();
+      } catch (error) {
+        console.error("Unable to play preview:", error);
+        setPlaying(false);
+      }
+
+      return;
+    }
+
     if (audio.paused) {
       try {
         await audio.play();
-      } catch {
+      } catch (error) {
+        console.error("Unable to play preview:", error);
         setPlaying(false);
       }
     } else {
@@ -92,7 +134,9 @@ export default function Home() {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = Math.floor(seconds % 60);
 
-    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+    return `${minutes}:${remainingSeconds
+      .toString()
+      .padStart(2, "0")}`;
   }
 
   function toggleLike(title: string) {
@@ -104,12 +148,21 @@ export default function Home() {
   }
 
   const progressPercentage =
-    duration > 0 ? Math.min((currentTime / duration) * 100, 100) : 0;
+    duration > 0
+      ? Math.min((currentTime / duration) * 100, 100)
+      : 0;
+
+  const moonGarden = stories[0];
+  const moonGardenPlaying = isStoryPlaying(moonGarden);
 
   return (
     <main>
       <header className="site-header">
-        <a className="brand" href="#top" aria-label="StoryTrail home">
+        <a
+          className="brand"
+          href="#top"
+          aria-label="StoryTrail home"
+        >
           <span className="brand-mark">S</span>
           StoryTrail
         </a>
@@ -159,8 +212,8 @@ export default function Home() {
           </h1>
 
           <p>
-            Thoughtful stories, music and adventures made for screen-free
-            moments—at home or on the move.
+            Thoughtful stories, music and adventures made for
+            screen-free moments—at home or on the move.
           </p>
 
           <div className="hero-actions">
@@ -171,23 +224,25 @@ export default function Home() {
             <button
               className="preview-button"
               type="button"
-              onClick={togglePreview}
+              onClick={() => void toggleStoryPreview(moonGarden)}
             >
               <span>
-                {playing ? (
+                {moonGardenPlaying ? (
                   <Pause size={18} fill="currentColor" />
                 ) : (
                   <Play size={18} fill="currentColor" />
                 )}
               </span>
 
-              {playing ? "Pause preview" : "Hear a preview"}
+              {moonGardenPlaying
+                ? "Pause preview"
+                : "Hear a preview"}
             </button>
           </div>
 
           <audio
             ref={previewAudio}
-            src={previewUrl}
+            src={getPreviewUrl(moonGarden.previewPath)}
             preload="metadata"
             onPlay={() => {
               setPlaying(true);
@@ -237,12 +292,14 @@ export default function Home() {
           <div className="now-playing">
             <button
               type="button"
-              onClick={togglePreview}
+              onClick={() => void toggleStoryPreview(moonGarden)}
               aria-label={
-                playing ? "Pause Moon Garden" : "Play Moon Garden"
+                moonGardenPlaying
+                  ? "Pause Moon Garden"
+                  : "Play Moon Garden"
               }
             >
-              {playing ? (
+              {moonGardenPlaying ? (
                 <Pause size={20} fill="currentColor" />
               ) : (
                 <Play size={20} fill="currentColor" />
@@ -255,7 +312,11 @@ export default function Home() {
               <span>Chapter 1 · The silver seed</span>
             </div>
 
-            <div className={`wave ${playing ? "active" : ""}`}>
+            <div
+              className={`wave ${
+                moonGardenPlaying ? "active" : ""
+              }`}
+            >
               <i />
               <i />
               <i />
@@ -268,7 +329,9 @@ export default function Home() {
       <section id="stories" className="story-section">
         <div className="section-heading">
           <div>
-            <span className="eyebrow plain">Listen your way</span>
+            <span className="eyebrow plain">
+              Listen your way
+            </span>
             <h2>Find their next favourite</h2>
           </div>
 
@@ -289,7 +352,7 @@ export default function Home() {
 
         <div className="story-grid">
           {stories.map((story, index) => {
-            const isMoonGarden = index === 0;
+            const storyPlaying = isStoryPlaying(story);
 
             return (
               <article className="story-card" key={story.title}>
@@ -307,17 +370,15 @@ export default function Home() {
                     className="card-play"
                     type="button"
                     aria-label={
-                      isMoonGarden && playing
-                        ? "Pause Moon Garden"
+                      storyPlaying
+                        ? `Pause ${story.title}`
                         : `Play ${story.title}`
                     }
-                    onClick={() => {
-                      if (isMoonGarden) {
-                        void togglePreview();
-                      }
-                    }}
+                    onClick={() =>
+                      void toggleStoryPreview(story)
+                    }
                   >
-                    {isMoonGarden && playing ? (
+                    {storyPlaying ? (
                       <Pause size={18} fill="currentColor" />
                     ) : (
                       <Play size={18} fill="currentColor" />
@@ -333,14 +394,20 @@ export default function Home() {
 
                   <button
                     className={`heart ${
-                      liked.includes(story.title) ? "liked" : ""
+                      liked.includes(story.title)
+                        ? "liked"
+                        : ""
                     }`}
                     type="button"
                     onClick={() => toggleLike(story.title)}
                     aria-label={`${
-                      liked.includes(story.title) ? "Remove" : "Add"
+                      liked.includes(story.title)
+                        ? "Remove"
+                        : "Add"
                     } ${story.title} ${
-                      liked.includes(story.title) ? "from" : "to"
+                      liked.includes(story.title)
+                        ? "from"
+                        : "to"
                     } favourites`}
                   >
                     <Heart
@@ -364,9 +431,12 @@ export default function Home() {
 
         <p>
           <strong>
-            Made for small ears. Designed for grown-up peace of mind.
+            Made for small ears. Designed for grown-up peace of
+            mind.
           </strong>
-          <span>Age-aware discovery, calm design and no adverts.</span>
+          <span>
+            Age-aware discovery, calm design and no adverts.
+          </span>
         </p>
 
         <a href="#membership">
@@ -378,19 +448,27 @@ export default function Home() {
         <div
           className="mini-player"
           role="region"
-          aria-label="Moon Garden audio player"
+          aria-label={`${activeStory.title} audio player`}
         >
-          <div className="mini-cover">☾</div>
+          <div className={`mini-cover ${activeStory.tone}`}>
+            {activeStory.symbol}
+          </div>
 
           <div className="track">
-            <strong>Moon Garden</strong>
-            <span>The silver seed</span>
+            <strong>{activeStory.title}</strong>
+            <span>{activeStory.subtitle}</span>
           </div>
 
           <button
             type="button"
-            onClick={togglePreview}
-            aria-label={playing ? "Pause Moon Garden" : "Play Moon Garden"}
+            onClick={() =>
+              void toggleStoryPreview(activeStory)
+            }
+            aria-label={
+              playing
+                ? `Pause ${activeStory.title}`
+                : `Play ${activeStory.title}`
+            }
           >
             {playing ? (
               <Pause size={20} fill="currentColor" />
