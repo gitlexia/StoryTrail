@@ -9,3 +9,79 @@
 @media(max-width:560px){.site-header{height:68px;padding:0 18px}.primary-button.small{display:none}.hero{padding:28px 18px 55px;gap:45px}.hero-copy{text-align:left}.eyebrow,.hero-actions,.trust-row{justify-content:flex-start}h1{font-size:3.45rem}.hero-copy>p{font-size:1rem}.hero-actions{flex-direction:column;align-items:flex-start}.hero-art{height:385px;border-radius:42px}.moon-shape{font-size:9rem;top:48px}.now-playing{left:5%;right:5%;bottom:5%}.wave{display:none}.story-section{padding:55px 18px;border-radius:34px 34px 0 0}.section-heading{align-items:center}.link-button{font-size:0;width:38px}.link-button svg{width:20px}.story-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.cover{border-radius:18px}.cover>span{font-size:4.5rem}.card-meta h3{font-size:.94rem}.card-meta p{font-size:.67rem}.parent-strip{margin:0 18px 90px;padding:22px}.parent-strip p strong{font-size:.9rem}.mini-player{bottom:10px}.progress,.time{display:none}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.wave.active i{animation:none}.primary-button,.card-play{transition:none}}
 :root{--font-display:Georgia,"Times New Roman";}
+
+.header-search-input {
+  width: 180px;
+  padding: 0.65rem 0.9rem;
+  border: 1px solid #d6dbea;
+  border-radius: 999px;
+  background: white;
+  color: #15213f;
+  font: inherit;
+  outline: none;
+}
+
+.header-search-input:focus {
+  border-color: #4f72ef;
+  box-shadow: 0 0 0 3px rgba(79, 114, 239, 0.14);
+}
+
+.no-stories-message {
+  margin: 2rem 0;
+  color: #68738e;
+  font-size: 1rem;
+}
+
+@media (max-width: 760px) {
+  .header-search-input {
+    position: absolute;
+    top: 4.75rem;
+    left: 1rem;
+    right: 1rem;
+    width: auto;
+    z-index: 20;
+  }
+}
+
+.mini-player .full-story-button {
+  width: fit-content;
+  height: auto;
+  margin-top: 0.2rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #f7cf4d;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 800;
+  line-height: 1.2;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.mini-player .full-story-button:hover {
+  color: #ffffff;
+  background: transparent;
+}
+
+.mini-player .full-story-button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.full-story-status {
+  color: #f7cf4d;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.player-message {
+  display: block;
+  max-width: 230px;
+  margin-top: 0.2rem;
+  color: #ffd4c9;
+  font-size: 0.7rem;
+  line-height: 1.2;
+}
