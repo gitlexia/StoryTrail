@@ -293,9 +293,9 @@ export default function Home() {
         </a>
 
         <nav aria-label="Main navigation">
-          <a href="#stories">Discover</a>
-          <a href="#membership">Membership</a>
-          <a href="#parents">For parents</a>
+          <Link href="/#stories">Discover</Link>
+          <Link href="/membership">Membership</Link>
+          <Link href="/#parents">For parents</Link>
         </nav>
 
         <div className="header-actions">
