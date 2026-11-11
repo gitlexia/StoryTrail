@@ -25,7 +25,7 @@ export default function Home() {
 
       <section id="top" className="hero">
         <div className="hero-copy">
-          <span className="eyebrow"><Sparkles size={15}/> Audio adventures for curious kids</span>
+          <span className="eyebrow"> Audio adventures for curious kids</span>
           <h1>Big worlds.<br/><em>Just press play.</em></h1>
           <p>Thoughtful stories, music and adventures made for screen-free moments—at home or on the move.</p>
           <div className="hero-actions"><button className="primary-button">Explore stories <ArrowRight size={18}/></button><button className="preview-button" onClick={() => setPlaying(!playing)}><span>{playing ? <Pause size={18} fill="currentColor"/> : <Play size={18} fill="currentColor"/>}</span>{playing ? "Pause preview" : "Hear a preview"}</button></div>
