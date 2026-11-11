@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { returnPath } from "@/lib/return-path";
 import AuthForm from "./auth-form";
 import styles from "./auth.module.css";
 import Link from "next/link";
@@ -8,7 +9,8 @@ export const metadata: Metadata = {
   description: "Sign in or create your StoryTrail family account.",
 };
 
-export default function AuthPage() {
+export default async function AuthPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
+  const next = returnPath((await searchParams).next);
   return (
     <main className={styles.page}>
       <section className={styles.introduction}>
@@ -29,7 +31,7 @@ export default function AuthPage() {
       </section>
 
       <section className={styles.formSection}>
-        <AuthForm />
+        <AuthForm next={next} />
       </section>
     </main>
   );

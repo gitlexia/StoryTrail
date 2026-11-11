@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { returnPath } from "@/lib/return-path";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
@@ -10,7 +11,7 @@ export async function GET(request: NextRequest) {
 
     if (!error) {
       const destination = request.nextUrl.clone();
-      destination.pathname = "/";
+      destination.pathname = returnPath(request.nextUrl.searchParams.get("next"));
       destination.search = "";
 
       return NextResponse.redirect(destination);

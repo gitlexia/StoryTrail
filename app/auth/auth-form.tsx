@@ -7,7 +7,7 @@ import styles from "./auth.module.css";
 
 type Mode = "login" | "signup";
 
-export default function AuthForm() {
+export default function AuthForm({ next }: { next: string }) {
   const router = useRouter();
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
@@ -35,7 +35,7 @@ export default function AuthForm() {
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
         },
       });
 
@@ -55,7 +55,7 @@ export default function AuthForm() {
         setMessage(error.message);
         setIsError(true);
       } else {
-        router.push("/");
+        router.push(next);
         router.refresh();
       }
     }
@@ -72,7 +72,7 @@ export default function AuthForm() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
       },
     });
 
