@@ -4,313 +4,116 @@ import { useEffect, useRef, useState } from "react";
 import { Pause, Play } from "lucide-react";
 import styles from "./story-player.module.css";
 
-type StoryPlayerProps = {
-  slug: string;
-  title: string;
-  previewUrl: string;
-  premium: boolean;
-};
-
 type Track = "preview" | "full";
+type Props = { slug: string; title: string; previewUrl: string | null; canPlayFull: boolean };
+type Signed = { url: string; expiresAt: number };
 
-export default function StoryPlayer({
-  slug,
-  title,
-  previewUrl,
-  premium,
-}: StoryPlayerProps) {
+function time(seconds: number) {
+  const whole = Math.floor(Number.isFinite(seconds) ? seconds : 0);
+  return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, "0")}`;
+}
+
+async function fetchFull(slug: string, signal?: AbortSignal): Promise<Signed> {
+  const response = await fetch(`/api/stories/${slug}/audio`, { method: "POST", signal, cache: "no-store" });
+  const result = await response.json() as { signedUrl?: string; error?: string };
+  if (!response.ok || !result.signedUrl) throw new Error(result.error ?? "Could not load the full recording.");
+  return { url: result.signedUrl, expiresAt: Date.now() + 14 * 60_000 };
+}
+
+export default function StoryPlayer({ slug, title, previewUrl, canPlayFull }: Props) {
   const audioRef = useRef<HTMLAudioElement>(null);
-
-  const [track, setTrack] = useState<Track>("preview");
+  const signed = useRef<Signed | null>(null);
+  const selection = useRef({ revision: 0 });
+  const [track, setTrack] = useState<Track>(previewUrl ? "preview" : "full");
   const [playing, setPlaying] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [fullAudioUrl, setFullAudioUrl] = useState("");
+  const [loading, setLoading] = useState(canPlayFull);
   const [message, setMessage] = useState("");
-  const [currentTime, setCurrentTime] = useState(0);
+  const [elapsed, setElapsed] = useState(0);
   const [duration, setDuration] = useState(0);
 
-  // Load the preview when the player first appears.
   useEffect(() => {
     const audio = audioRef.current;
-
-    if (!audio) return;
-
-    audio.src = previewUrl;
-    audio.load();
-
-    setTrack("preview");
-    setCurrentTime(0);
-    setDuration(0);
-    setPlaying(false);
-  }, [previewUrl]);
-
-  // Prepare free full stories before the user presses play.
-  useEffect(() => {
-    if (premium) return;
-
+    if (audio && previewUrl) audio.src = previewUrl;
+    if (!canPlayFull) return;
     const controller = new AbortController();
-    let cancelled = false;
+    void fetchFull(slug, controller.signal).then(result => {
+      if (!controller.signal.aborted) signed.current = result;
+    }).catch(() => {
+      // Keep the full-story button available so the listener can retry.
+    }).finally(() => {
+      if (!controller.signal.aborted) setLoading(false);
+    });
+    const marker = selection.current;
+    return () => { controller.abort(); marker.revision++; };
+  }, [slug, canPlayFull, previewUrl]);
 
-    async function prepareFullStory() {
-      setLoading(true);
-
-      try {
-        const response = await fetch(`/api/stories/${slug}/audio`, {
-          method: "POST",
-          signal: controller.signal,
-        });
-
-        if (!response.ok) return;
-
-        const result = (await response.json()) as {
-          signedUrl?: string;
-        };
-
-        if (!cancelled && result.signedUrl) {
-          setFullAudioUrl(result.signedUrl);
-        }
-      } catch (error) {
-        if (
-          error instanceof Error &&
-          error.name !== "AbortError"
-        ) {
-          console.error("Unable to prepare full story:", error);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    }
-
-    void prepareFullStory();
-
-    return () => {
-      cancelled = true;
-      controller.abort();
-    };
-  }, [slug, premium]);
-
-  async function loadFullStory() {
-    if (fullAudioUrl) {
-      return fullAudioUrl;
-    }
-
-    setLoading(true);
-    setMessage("");
-
-    try {
-      const response = await fetch(`/api/stories/${slug}/audio`, {
-        method: "POST",
-      });
-
-      if (response.status === 401) {
-        window.location.href = `/auth?next=/stories/${slug}`;
-        return "";
-      }
-
-      const result = (await response.json()) as {
-        signedUrl?: string;
-        error?: string;
-      };
-
-      if (!response.ok || !result.signedUrl) {
-        setMessage(
-          response.status === 403
-            ? "This story requires a Plus membership."
-            : result.error ?? "The full story could not be loaded.",
-        );
-
-        return "";
-      }
-
-      setFullAudioUrl(result.signedUrl);
-      return result.signedUrl;
-    } catch {
-      setMessage("The full story could not be loaded.");
-      return "";
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function playTrack(nextTrack: Track) {
+  async function play(next: Track, toggle = false) {
     const audio = audioRef.current;
-
     if (!audio) return;
-
+    const intent = ++selection.current.revision;
     setMessage("");
-
-    let nextUrl = previewUrl;
-
-    if (nextTrack === "full") {
-      const signedUrl = await loadFullStory();
-
-      if (!signedUrl) return;
-
-      nextUrl = signedUrl;
-    }
-
-    if (audio.src !== nextUrl) {
-      audio.pause();
-      audio.src = nextUrl;
-      audio.currentTime = 0;
-      audio.load();
-
-      setCurrentTime(0);
-      setDuration(0);
-    }
-
-    setTrack(nextTrack);
-
+    let url = previewUrl;
     try {
+      if (next === "full") {
+        if (!canPlayFull) return;
+        if (!signed.current || signed.current.expiresAt <= Date.now()) {
+          setLoading(true);
+          signed.current = await fetchFull(slug);
+        }
+        url = signed.current.url;
+      }
+      if (!url || intent !== selection.current.revision) return;
+      if (audio.getAttribute("src") !== url) {
+        audio.pause();
+        audio.src = url;
+        setElapsed(0);
+        setDuration(0);
+        setTrack(next);
+      } else if (toggle && !audio.paused) {
+        audio.pause();
+        return;
+      }
       await audio.play();
-    } catch {
-      setPlaying(false);
-      setMessage("Playback could not begin. Please try again.");
+    } catch (error) {
+      if (intent !== selection.current.revision) return;
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      setMessage(error instanceof DOMException && error.name === "NotAllowedError"
+        ? "Recording ready. Press play to listen."
+        : error instanceof Error ? error.message : "Could not play this recording.");
+    } finally {
+      if (next === "full") setLoading(false);
     }
   }
 
-  async function togglePlayback() {
-    const audio = audioRef.current;
-
-    if (!audio) return;
-
-    setMessage("");
-
-    if (audio.paused) {
-      try {
-        await audio.play();
-      } catch {
-        setPlaying(false);
-        setMessage("Playback could not begin. Please try again.");
-      }
-    } else {
-      audio.pause();
-    }
-  }
-
-  function formatTime(seconds: number) {
-    if (!Number.isFinite(seconds)) return "0:00";
-
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = Math.floor(seconds % 60);
-
-    return `${minutes}:${remainingSeconds
-      .toString()
-      .padStart(2, "0")}`;
-  }
-
-  const progress =
-    duration > 0
-      ? Math.min((currentTime / duration) * 100, 100)
-      : 0;
-
-  return (
-    <section
-        className={styles.player}
-        aria-label={`${title} player`}
-    >
-        <div className={styles.trackButtons}>
-        <button
-            className={`${styles.trackButton} ${
-            track === "preview" ? styles.activeTrack : ""
-            }`}
-            type="button"
-            aria-pressed={track === "preview"}
-            onClick={() => void playTrack("preview")}
-        >
-            Play preview
-        </button>
-
-        <button
-            className={`${styles.trackButton} ${
-            track === "full" ? styles.activeTrack : ""
-            }`}
-            type="button"
-            aria-pressed={track === "full"}
-            onClick={() => void playTrack("full")}
-            disabled={loading}
-        >
-            {loading
-            ? "Preparing full story…"
-            : premium
-                ? "Unlock full story"
-                : "Play full story"}
-        </button>
+  return <section className={styles.player} aria-label={`${title} player`}>
+    <div className={styles.trackButtons}>
+      {previewUrl && <button type="button" className={`${styles.trackButton} ${track === "preview" ? styles.activeTrack : ""}`} onClick={() => void play("preview")}>Play preview</button>}
+      {canPlayFull && <button type="button" className={`${styles.trackButton} ${track === "full" ? styles.activeTrack : ""}`} disabled={loading} onClick={() => void play("full")}>{loading ? "Preparing full story…" : "Play full story"}</button>}
+    </div>
+    <div className={styles.controls}>
+      <button type="button" className={styles.playButton} disabled={track === "full" && loading} onClick={() => void play(track, true)} aria-label={playing ? `Pause ${title}` : `Play ${title}`}>
+        {playing ? <Pause size={22} fill="currentColor" /> : <Play size={22} fill="currentColor" />}
+      </button>
+      <div className={styles.playback}>
+        <span className={styles.trackLabel}>{track === "full" ? "Full story" : "Story preview"}</span>
+        <div className={styles.progressRow}>
+          <input className={styles.seek} type="range" aria-label="Playback position" min={0} max={duration || 1} step={0.1} value={Math.min(elapsed, duration)} disabled={!duration} onChange={event => {
+            const position = Number(event.target.value);
+            if (audioRef.current) audioRef.current.currentTime = position;
+            setElapsed(position);
+          }} />
+          <span className={styles.time}>{time(elapsed)} / {time(duration)}</span>
         </div>
-
-        <div className={styles.controls}>
-        <button
-            className={styles.playButton}
-            type="button"
-            onClick={() => void togglePlayback()}
-            aria-label={
-            playing ? `Pause ${title}` : `Play ${title}`
-            }
-        >
-            {playing ? (
-            <Pause size={22} fill="currentColor" />
-            ) : (
-            <Play size={22} fill="currentColor" />
-            )}
-        </button>
-
-        <div className={styles.playback}>
-            <span className={styles.trackLabel}>
-            {track === "full" ? "Full story" : "Story preview"}
-            </span>
-
-            <div className={styles.progressRow}>
-            <div
-                className={styles.progressTrack}
-                role="progressbar"
-                aria-label="Playback progress"
-                aria-valuemin={0}
-                aria-valuemax={duration || 0}
-                aria-valuenow={currentTime}
-            >
-                <div
-                className={styles.progressFill}
-                style={{ width: `${progress}%` }}
-                />
-            </div>
-
-            <span className={styles.time}>
-                {formatTime(currentTime)} / {formatTime(duration)}
-            </span>
-            </div>
-        </div>
-        </div>
-
-        {message && (
-        <p className={styles.message} role="alert">
-            {message}
-        </p>
-        )}
-
-        <audio
-        ref={audioRef}
-        preload="metadata"
-        onPlay={() => setPlaying(true)}
-        onPause={() => setPlaying(false)}
-        onLoadedMetadata={(event) => {
-            setDuration(event.currentTarget.duration);
-        }}
-        onDurationChange={(event) => {
-            if (Number.isFinite(event.currentTarget.duration)) {
-            setDuration(event.currentTarget.duration);
-            }
-        }}
-        onTimeUpdate={(event) => {
-            setCurrentTime(event.currentTarget.currentTime);
-        }}
-        onEnded={(event) => {
-            event.currentTarget.currentTime = 0;
-            setPlaying(false);
-            setCurrentTime(0);
-        }}
-        />
-    </section>
-    );
+      </div>
+    </div>
+    {message && <p className={styles.message} role="status">{message}</p>}
+    <audio ref={audioRef} preload="metadata"
+      onPlaying={() => { setPlaying(true); setMessage(""); }}
+      onPause={() => setPlaying(false)}
+      onError={() => { setPlaying(false); if (track === "full") signed.current = null; setMessage("This recording couldn’t load. Try playing it again."); }}
+      onDurationChange={event => setDuration(Number.isFinite(event.currentTarget.duration) ? event.currentTarget.duration : 0)}
+      onTimeUpdate={event => setElapsed(event.currentTarget.currentTime)}
+      onEnded={event => { event.currentTarget.currentTime = 0; setElapsed(0); setPlaying(false); }}
+    />
+  </section>;
 }

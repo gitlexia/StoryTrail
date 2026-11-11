@@ -16,52 +16,8 @@ import {
 import AuthNavLink from "@/components/auth-nav-link";
 import Link from "next/link";
 
-const stories = [
-  {
-    title: "Moon Garden",
-    slug: "moon-garden",
-    subtitle: "The silver seed",
-    eyebrow: "Ages 5–8 · 18 min",
-    category: "Bedtime",
-    premium: false,
-    tone: "moon",
-    symbol: "☾",
-    previewPath: "moon-garden/preview.mp3",
-  },
-  {
-    title: "The Tiny Orchestra",
-    slug: "the-tiny-orchestra",
-    subtitle: "A very small symphony",
-    eyebrow: "Ages 4–7 · 12 min",
-    category: "Music",
-    premium: false,
-    tone: "music",
-    symbol: "♫",
-    previewPath: "tiny-orchestra/preview.mp3",
-  },
-  {
-    title: "Dinosaur Detectives",
-    slug: "dinosaur-detectives",
-    subtitle: "The mysterious footprint",
-    eyebrow: "Ages 6–9 · 22 min",
-    category: "Adventures",
-    premium: true,
-    tone: "dino",
-    symbol: "✦",
-    previewPath: "dinosaur-detectives/preview.mp3",
-  },
-  {
-    title: "Cloudberry Woods",
-    slug: "cloudberry-woods",
-    subtitle: "The glowing berry",
-    eyebrow: "Ages 3–6 · 9 min",
-    category: "Learn & wonder",
-    premium: true,
-    tone: "woods",
-    symbol: "♧",
-    previewPath: "cloudberry-woods/preview.mp3",
-  },
-];
+import Image from "next/image";
+import { featured as stories, storyCover } from "@/lib/catalogue";
 
 const filters = [
   "For you",
@@ -85,10 +41,7 @@ export default function Home() {
   useState<Filter>("For you");
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [playbackMode, setPlaybackMode] =
-    useState<"preview" | "full">("preview");
-  const [fullStoryLoading, setFullStoryLoading] =
-    useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [playerMessage, setPlayerMessage] = useState("");
 
   const previewAudio = useRef<HTMLAudioElement>(null);
@@ -118,7 +71,6 @@ export default function Home() {
   function isStoryPlaying(story: Story) {
     return (
       activeStory.slug === story.slug &&
-      playbackMode === "preview" &&
       playing
     );
   }
@@ -129,14 +81,13 @@ export default function Home() {
     if (!audio) return;
 
     setPlayerVisible(true);
+    setPlayerMessage("");
 
     const isSelectedStory =
-      activeStory.slug === story.slug &&
-      playbackMode === "preview";
+      activeStory.slug === story.slug;
 
     if (!isSelectedStory) {
       audio.pause();
-      setPlaybackMode("preview");
       setPlayerMessage("");
 
       setActiveStory(story);
@@ -151,6 +102,7 @@ export default function Home() {
       } catch (error) {
         console.error("Unable to play preview:", error);
         setPlaying(false);
+        setPlayerMessage("This preview could not play. Try again.");
       }
 
       return;
@@ -162,6 +114,7 @@ export default function Home() {
       } catch (error) {
         console.error("Unable to play preview:", error);
         setPlaying(false);
+        setPlayerMessage("This preview could not play. Try again.");
       }
     } else {
       audio.pause();
@@ -179,61 +132,10 @@ export default function Home() {
       } catch (error) {
         console.error("Unable to play audio:", error);
         setPlaying(false);
+        setPlayerMessage("This preview could not play. Try again.");
       }
     } else {
       audio.pause();
-    }
-  }
-
-  async function playFullStory(story: Story) {
-    const audio = previewAudio.current;
-
-    if (!audio) return;
-
-    setFullStoryLoading(true);
-    setPlayerMessage("");
-    setPlayerVisible(true);
-
-    try {
-      const response = await fetch(
-        `/api/stories/${story.slug}/audio`,
-        {
-          method: "POST",
-        },
-      );
-
-      const result = await response.json();
-
-      if (response.status === 401) {
-        window.location.href = "/auth";
-        return;
-      }
-
-      if (!response.ok) {
-        setPlayerMessage(
-          result.error ?? "Unable to load the full story.",
-        );
-        return;
-      }
-
-      audio.pause();
-
-      setActiveStory(story);
-      setPlaybackMode("full");
-      setCurrentTime(0);
-      setDuration(0);
-
-      audio.src = result.signedUrl;
-      audio.load();
-
-      await audio.play();
-    } catch (error) {
-      console.error("Unable to load full story:", error);
-      setPlayerMessage(
-        "Something went wrong while loading the full story.",
-      );
-    } finally {
-      setFullStoryLoading(false);
     }
   }
 
@@ -293,9 +195,9 @@ export default function Home() {
         </a>
 
         <nav aria-label="Main navigation">
-          <Link href="/#stories">Discover</Link>
+          <Link href="/stories">Discover</Link>
           <Link href="/membership">Membership</Link>
-          <Link href="/#parents">For parents</Link>
+          <Link href="/for-parents">For parents</Link>
         </nav>
 
         <div className="header-actions">
@@ -352,12 +254,16 @@ export default function Home() {
           <button
             className="icon-button mobile-menu"
             type="button"
-            aria-label="Open menu"
+            aria-label="Navigation menu"
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-nav"
+            onClick={() => setMobileOpen(!mobileOpen)}
           >
             <Menu size={22} />
           </button>
         </div>
       </header>
+      {mobileOpen && <nav id="mobile-nav" className="story-mobile-nav" aria-label="Mobile navigation"><Link href="/stories">Discover</Link><Link href="/membership">Membership</Link><Link href="/for-parents">For parents</Link></nav>}
 
       <section id="top" className="hero">
         <div className="hero-copy">
@@ -409,6 +315,17 @@ export default function Home() {
             </button>
           </div>
 
+          <Link href="/reviews" className="trust-row hero-reviews-link">
+            <span className="avatar-stack" aria-hidden="true">
+              <i>R</i><i>M</i><i>A</i>
+            </span>
+            <span>
+              Loved by little listeners<br />
+              <b>4.9 from parents</b><br />
+              Read Reviews
+            </span>
+          </Link>
+
           <audio
             ref={previewAudio}
             src={getPreviewUrl(moonGarden.previewPath)}
@@ -430,33 +347,14 @@ export default function Home() {
             onEnded={handlePreviewEnded}
           />
 
-          <div className="trust-row">
-            <span className="avatar-stack">
-              <i>R</i>
-              <i>M</i>
-              <i>A</i>
-            </span>
 
-            <span>
-              Loved by little listeners
-              <br />
-              <b>4.9 from parents</b>
-            </span>
-          </div>
         </div>
 
         <div
           className="hero-art"
           aria-label="Featured story, Moon Garden"
         >
-          <div className="orbit orbit-one" />
-          <div className="orbit orbit-two" />
-
-          <div className="moon-shape">☾</div>
-
-          <span className="star s1">✦</span>
-          <span className="star s2">·</span>
-          <span className="star s3">✧</span>
+          <Image src={storyCover(moonGarden.slug)} alt="" fill priority sizes="(max-width: 760px) 100vw, 50vw" className="painted-cover" />
 
           <div className="now-playing">
             <button
@@ -504,13 +402,9 @@ export default function Home() {
             <h2>Find their next favourite</h2>
           </div>
 
-          <button
-            className="link-button"
-            type="button"
-            onClick={() => setActiveFilter("For you")}
-          >
+          <Link className="link-button" href="/stories">
             See all stories <ChevronRight size={18} />
-          </button>
+          </Link>
         </div>
 
         <div className="filters" aria-label="Story filters">
@@ -534,7 +428,7 @@ export default function Home() {
             return (
               <article className="story-card" key={story.title}>
                 <div className={`cover ${story.tone}`}>
-                  <span>{story.symbol}</span>
+                  <Image src={storyCover(story.slug)} alt="" fill sizes="(max-width: 760px) 50vw, 25vw" className="painted-cover" />
 
                   {story.premium && (
                     <div className="premium">
@@ -624,9 +518,9 @@ export default function Home() {
           </span>
         </p>
 
-        <a href="#membership">
+        <Link href="/about">
           Why families choose us <ArrowRight size={17} />
-        </a>
+        </Link>
       </section>
 
       {playerVisible && (
@@ -636,17 +530,13 @@ export default function Home() {
           aria-label={`${activeStory.title} audio player`}
         >
           <div className={`mini-cover ${activeStory.tone}`}>
-            {activeStory.symbol}
+            <Image src={storyCover(activeStory.slug)} alt="" width={56} height={56} />
           </div>
 
           <div className="track">
             <strong>{activeStory.title}</strong>
 
-            <span>
-              {playbackMode === "full"
-                ? "Full story"
-                : activeStory.subtitle}
-            </span>
+            <span>{activeStory.subtitle}</span>
 
             <Link
               className="full-story-button"

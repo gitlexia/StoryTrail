@@ -1,109 +1,53 @@
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { LockKeyhole } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { hasPlus } from "@/lib/plus";
+import { catalogue, storyCover } from "@/lib/catalogue";
+import EditorialShell from "@/components/editorial-shell";
 import StoryPlayer from "./story-player";
-import styles from "./story.module.css";
+import styles from "../discovery.module.css";
 
-type StoryPageProps = {
-  params: Promise<{
-    slug: string;
-  }>;
-};
+type Props = { params: Promise<{ slug: string }> };
 
-function formatDuration(seconds: number) {
-  const minutes = Math.round(seconds / 60);
-  return `${minutes} min`;
+export async function generateMetadata({ params }: Props) {
+  const { slug } = await params;
+  const match = catalogue.find(item => item.slug === slug);
+  return match ? { title: `${match.title} | StoryTrail`, description: match.description } : { title: "Story not found | StoryTrail" };
 }
 
-export default async function StoryPage({
-  params,
-}: StoryPageProps) {
+export default async function StoryPage({ params }: Props) {
   const { slug } = await params;
+  const story = catalogue.find(item => item.slug === slug);
+  if (!story) notFound();
   const supabase = await createClient();
-
-  const { data: story, error } = await supabase
-    .from("stories")
-    .select(
-      `
-        slug,
-        title,
-        description,
-        creator,
-        category,
-        age_min,
-        age_max,
-        duration_seconds,
-        access_level,
-        preview_path
-      `,
-    )
-    .eq("slug", slug)
-    .single();
-
-  if (error || !story || !story.preview_path) {
-    notFound();
+  const { data: { user } } = await supabase.auth.getUser();
+  let canPlayFull = Boolean(user && !story.premium);
+  let unavailable = false;
+  if (user && story.premium) {
+    try { canPlayFull = await hasPlus(user.id); }
+    catch { unavailable = true; }
   }
 
-  const { data: previewData } = supabase.storage
-    .from("story-previews")
-    .getPublicUrl(story.preview_path);
+  const previewUrl = story.previewPath
+    ? supabase.storage.from("story-previews").getPublicUrl(story.previewPath).data.publicUrl
+    : null;
 
-  const previewUrl = previewData.publicUrl;
-
-  return (
-    <main className={styles.page}>
-      <nav className={styles.navigation}>
-        <Link className={styles.logo} href="/">
-          StoryTrail
-        </Link>
-
-        <Link className={styles.backLink} href="/#stories">
-          Back to stories
-        </Link>
-      </nav>
-
-      <section className={styles.hero}>
-        <div className={styles.cover} aria-hidden="true">
-          {story.category === "music"
-            ? "♫"
-            : story.category === "adventure"
-              ? "✦"
-              : story.category === "learning"
-                ? "♧"
-                : "☾"}
-        </div>
-
-        <div className={styles.details}>
-          <p className={styles.eyebrow}>
-            {story.category} · Ages {story.age_min}–{story.age_max}
-          </p>
-
-          <h1>{story.title}</h1>
-
-          <p className={styles.description}>{story.description}</p>
-
-          <div className={styles.metadata}>
-            <span>{formatDuration(story.duration_seconds)}</span>
-            <span>By {story.creator}</span>
-            <span>
-              {story.access_level === "premium"
-                ? "StoryTrail Plus"
-                : "Free story"}
-            </span>
-          </div>
-
-          <div className={styles.preview}>
-            <p>Listen now</p>
-
-            <StoryPlayer
-              slug={story.slug}
-              title={story.title}
-              previewUrl={previewUrl}
-              premium={story.access_level === "premium"}
-            />
-          </div>
-        </div>
-      </section>
-    </main>
-  );
+  return <EditorialShell><section className={`${styles.wrap} ${styles.hero}`}>
+    <div className={styles.art}><Image src={storyCover(slug)} fill alt="" priority sizes="(max-width: 820px) 100vw, 45vw" /></div>
+    <div>
+      <Link className={styles.secondary} href="/stories">← All stories</Link>
+      <p className={styles.kicker}>{story.category} · Ages {story.ages} · {story.premium ? "StoryTrail Plus" : "Free story"}</p>
+      <h1>{story.title}</h1>
+      <p className={styles.lead}>{story.description}</p>
+      {(previewUrl || canPlayFull) && <StoryPlayer key={slug} slug={slug} title={story.title} previewUrl={previewUrl} canPlayFull={canPlayFull} />}
+      {!canPlayFull && <div className={styles.actions}>
+        {unavailable ? <p role="status">We couldn’t check your membership. Refresh to try again.</p> :
+          !user ? <Link className={styles.button} href={`/auth?next=${encodeURIComponent(`/stories/${slug}`)}`}><LockKeyhole size={16} aria-hidden="true" />Sign in to listen</Link> :
+          <Link className={styles.button} href="/membership"><LockKeyhole size={16} aria-hidden="true" />Unlock with StoryTrail Plus</Link>}
+        {story.premium && !user && <Link className={styles.secondary} href="/membership">See Plus plans</Link>}
+      </div>}
+    </div>
+  </section></EditorialShell>;
 }

@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { signOut } from "./actions";
 import ProfileForm from "./profile-form";
 import styles from "./account.module.css";
+import { billingCustomer, hasPlus } from "@/lib/plus";
+import { openBillingPortal } from "@/app/membership/actions";
 import ProfileControls from "./profile-controls";
 
 const avatarSymbols: Record<string, string> = {
@@ -33,6 +35,15 @@ export default async function AccountPage() {
     console.error("Unable to load listener profiles:", profilesError);
   }
 
+  let customer: string | undefined;
+  let membership = "Free listener";
+  try {
+    customer = await billingCustomer(user.id);
+    if (customer && await hasPlus(user.id)) membership = "StoryTrail Plus";
+  } catch {
+    membership = "Status unavailable";
+  }
+
   const displayName =
     user.user_metadata.full_name ??
     user.user_metadata.name ??
@@ -52,7 +63,7 @@ export default async function AccountPage() {
           StoryTrail
         </Link>
 
-        <Link className={styles.homeLink} href="/">
+        <Link className={styles.homeLink} href="/stories">
           Back to stories
         </Link>
       </nav>
@@ -83,7 +94,12 @@ export default async function AccountPage() {
           <article className={styles.detailCard}>
             <div>
               <p className={styles.label}>Membership</p>
-              <p className={styles.value}>Free listener</p>
+              <p className={styles.value}>{membership}</p>
+              {customer && process.env.STORYTRAIL_BILLING_PORTAL === "true" ? (
+                <form action={openBillingPortal}>
+                  <button type="submit">Manage subscription</button>
+                </form>
+              ) : <Link href="/membership">View plans</Link>}
             </div>
 
             <div>

@@ -124,3 +124,5 @@
     text-align: left;
   }
 }
+.seek { width: 100%; min-width: 0; accent-color: #ffd45d; cursor: pointer; }
+.playButton:disabled,.seek:disabled { opacity: .55; cursor: default; }
